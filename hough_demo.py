@@ -39,8 +39,48 @@ line_image = np.copy(image)*0 # creating a blank to draw lines on
 
 # Run Hough on edge detected image
 # Output "lines" is an array containing endpoints of detected line segments
-lines = cv2.HoughLinesP(masked_edges, rho, theta, threshold, np.array([]),
-                            min_line_length, max_line_gap)
+rhos = [100, 50, 10, 3]
+for r in rhos:
+    print('rho =', r)
+    lines = cv2.HoughLinesP(masked_edges, r, theta, threshold, np.array([]),
+                                min_line_length, max_line_gap)
+
+    # lines – Output vector of lines. Each line is represented by a 4-element vector
+    # (x_1, y_1, x_2, y_2) , where  (x_1,y_1) and  (x_2, y_2) are the ending
+    # points of each detected line segment.
+
+    # if running in Python2, number of lines will be shape[1]
+    # if Python3, number of lines will be shape[0]
+    if lines is not None:
+        print('shape of lines array:', lines.shape)
+        print('number of lines:', lines.shape[0])
+    else:
+        print('no lines detected!')
+
+    print()
+    print()
+
+rhos = range(1, 101)
+line_counts = []
+for r in rhos:
+    lines = cv2.HoughLinesP(masked_edges, r, theta, threshold, np.array([]),
+                                min_line_length, max_line_gap)
+
+    # lines – Output vector of lines. Each line is represented by a 4-element vector
+    # (x_1, y_1, x_2, y_2) , where  (x_1,y_1) and  (x_2, y_2) are the ending
+    # points of each detected line segment.
+
+    # if running in openCV 2.4.10 , number of lines will be shape[1]
+    # if openCV 3.1.0, number of lines will be shape[0]
+    if lines is None:
+        line_counts.append(0)
+    else:
+        line_counts.append(lines.shape[0])
+
+plt.plot(rhos, line_counts)
+plt.xlabel('rho parameter (distance resolution in pixels)')
+plt.ylabel('number of lines')
+plt.show()
 
 # Iterate over the output "lines" and draw lines on a blank image
 for line in lines:
@@ -53,3 +93,4 @@ color_edges = np.dstack((edges, edges, edges))
 # Draw the lines on the edge image
 lines_edges = cv2.addWeighted(color_edges, 0.8, line_image, 1, 0)
 plt.imshow(lines_edges)
+plt.show()
